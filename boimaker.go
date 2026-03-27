@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func bioMaker() {
+func BioMaker() {
 	var name string
 	var age int
 	var city string

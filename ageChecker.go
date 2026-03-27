@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func agechecker() {
+func Agechecker() {
 	fmt.Println("hello what is you name ?")
 	var name string
 	fmt.Scanln(&name)
@@ -19,7 +19,7 @@ func agechecker() {
 	}
 }
 
-func workStatusChecker() {
+func WorkStatusChecker() {
 	fmt.Println("hello what is you name ?")
 	var name string
 	fmt.Scanln(&name)
@@ -44,7 +44,8 @@ func workStatusChecker() {
 		fmt.Println("you are just adult hood")
 	}
 }
-func main() {
-	// agechecker()
-	workStatusChecker()
-}
+
+// func main() {
+// 	// agechecker()
+// 	workStatusChecker()
+// }

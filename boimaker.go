@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func bioMaker() {
 	var name string
 	var age int
 	var city string
@@ -20,6 +20,10 @@ func main() {
 	fmt.Scanln(&salary)
 	fmt.Printf("so now your bio is : \nname : %s \nage:%d  \ncity:%s  \n")
 }
+
+// func main() {
+// 	bioMaker()
+// }
 
 // day 1
 // learn a variable how to declar

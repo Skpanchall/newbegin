@@ -8,7 +8,8 @@ func main() {
 	fmt.Println("1. Bio Maker")
 	fmt.Println("2. Age Checker")
 	fmt.Println("3. Work Status Checker")
-	fmt.Println("3. Give Numbers and Print Even and Odd numbers")
+	fmt.Println("4. Give Numbers and Print Even and Odd numbers")
+	fmt.Println("5. functions")
 	fmt.Println("Enter choice:")
 
 	fmt.Scanln(&choice)
@@ -21,6 +22,8 @@ func main() {
 		WorkStatusChecker()
 	} else if choice == 4 {
 		EvenNumberPrint()
+	} else if choice == 5 {
+		FunctionBased()
 	} else {
 		fmt.Println("Invalid choice")
 	}

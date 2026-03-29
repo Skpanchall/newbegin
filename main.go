@@ -10,6 +10,7 @@ func main() {
 	fmt.Println("3. Work Status Checker")
 	fmt.Println("4. Give Numbers and Print Even and Odd numbers")
 	fmt.Println("5. functions")
+	fmt.Println("6. arrya and slices")
 	fmt.Println("Enter choice:")
 
 	fmt.Scanln(&choice)
@@ -24,6 +25,8 @@ func main() {
 		EvenNumberPrint()
 	} else if choice == 5 {
 		FunctionBased()
+	} else if choice == 6 {
+		ArrayAndSlices()
 	} else {
 		fmt.Println("Invalid choice")
 	}

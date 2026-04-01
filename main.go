@@ -12,6 +12,7 @@ func main() {
 	fmt.Println("5. functions")
 	fmt.Println("6. arrya and slices")
 	fmt.Println("7. sturcts")
+	fmt.Println("8. Profile update")
 	fmt.Println("Enter choice:")
 
 	fmt.Scanln(&choice)
@@ -30,6 +31,8 @@ func main() {
 		ArrayAndSlices()
 	} else if choice == 7 {
 		GetProductTotalValues()
+	} else if choice == 8 {
+		GetProfile()
 	} else {
 		fmt.Println("Invalid choice")
 	}

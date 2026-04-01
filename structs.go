@@ -28,3 +28,46 @@ func GetProductTotalValues() {
 	fmt.Println("total :", total)
 
 }
+
+type Profile struct {
+	Name    string
+	Age     int
+	Address string
+}
+
+func isAdult(age int) bool {
+	if age >= 18 {
+		return true
+	}
+	return false
+}
+func birthDay(user *Profile) {
+	user.Age++
+}
+
+func charelocateUser(user *Profile, newCity string) {
+	user.Address = newCity
+}
+
+func GetProfile() {
+	fmt.Println("enter your name, age, and city :")
+	var pr Profile
+	fmt.Scan(&pr.Name, &pr.Age, &pr.Address)
+	adult := isAdult(pr.Age)
+	if adult {
+		fmt.Printf("Welcome, %s! You are an adult.\n", pr.Name)
+	}
+
+	fmt.Println("change city ?")
+	var verify string
+	fmt.Scan(&verify)
+	if verify == "yes" || verify == "y" {
+		fmt.Println("enter new city name :")
+		var newCity string
+		fmt.Scan(&newCity)
+		charelocateUser(&pr, newCity)
+	}
+	birthDay(&pr)
+	fmt.Printf("Profile updated: Name: %s, Age: %d, Address: %s\n", pr.Name, pr.Age, pr.Address)
+
+}

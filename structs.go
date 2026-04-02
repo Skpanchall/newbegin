@@ -1,6 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+)
 
 type Product struct {
 	Name  string
@@ -69,5 +75,114 @@ func GetProfile() {
 	}
 	birthDay(&pr)
 	fmt.Printf("Profile updated: Name: %s, Age: %d, Address: %s\n", pr.Name, pr.Age, pr.Address)
+
+}
+
+//	{
+//	    "id": 4,
+//	    "name": "Patricia Lebsack",
+//	    "username": "Karianne",
+//	    "email": "Julianne.OConner@kory.org",
+//	    "address": {
+//	      "street": "Hoeger Mall",
+//	      "suite": "Apt. 692",
+//	      "city": "South Elvis",
+//	      "zipcode": "53919-4257",
+//	      "geo": {
+//	        "lat": "29.4572",
+//	        "lng": "-164.2990"
+//	      }
+//	    },
+//	    "phone": "493-170-9623 x156",
+//	    "website": "kale.biz",
+//	    "company": {
+//	      "name": "Robel-Corkery",
+//	      "catchPhrase": "Multi-tiered zero tolerance productivity",
+//	      "bs": "transition cutting-edge web services"
+//	    }
+//	  },
+type ApiUsers struct {
+	ID       int    `"json:"id"`
+	Name     string `"json:"name"`
+	Username string `"json:"username"`
+	Email    string `"json:"email"`
+	Address  struct {
+		Street  string `"json:"street"`
+		Suite   string `json:"suite"`
+		City    string `json:"city"`
+		Zipcode string `json:"zipcode"`
+		Geo     struct {
+			Lat string `json:"lat"`
+			Lng string `json:"lng"`
+		} `json:"geo"`
+	} `json:"address"`
+	Phone   string `json:"phone"`
+	Website string `json:"website"`
+	Company struct {
+		Name        string `json:"name"`
+		CatchPhrase string `json:"catchPhrase"`
+		Bs          string `json:"bs"`
+	} `json:"company"`
+}
+
+func ApiUserProcess() {
+	rep, err := http.Get("https://jsonplaceholder.typicode.com/users")
+	if err != nil {
+		fmt.Println("something went wrongs ")
+	}
+	body, err := io.ReadAll(rep.Body)
+	defer rep.Body.Close()
+	if err != nil {
+		fmt.Println("something went wrongs ")
+	}
+	users := []ApiUsers{}
+	err = json.Unmarshal(body, &users)
+	if err != nil {
+		fmt.Println("something went wrongs ")
+	}
+
+	fmt.Println("Select Feature")
+	fmt.Println("1. print all users name and email")
+	fmt.Println("2. Search user by name")
+	fmt.Println("3. Filter by Email Domain")
+
+	var choice int
+	fmt.Scan(&choice)
+	switch choice {
+	case 1:
+		for _, user := range users {
+			fmt.Println("name : ", user.Name, " email : ", user.Email)
+		}
+	case 2:
+		fmt.Println("Search user by name :")
+		var searchName string
+		fmt.Scan(&searchName)
+		var found bool
+		for _, user := range users {
+			if user.Name == searchName {
+				fmt.Println("name : ", user.Name, " email : ", user.Email)
+				found = true
+			}
+		}
+		if !found {
+			fmt.Println("user not found")
+		}
+	case 3:
+		fmt.Println("Filter by Email Domain :")
+		var domain string
+		fmt.Scan(&domain)
+		var found bool
+		for _, user := range users {
+			if strings.Contains(user.Email, domain) {
+				fmt.Println("name : ", user.Name, " email : ", user.Email)
+				found = true
+			}
+		}
+		if !found {
+			fmt.Println("no user found with this domain")
+		}
+	default:
+		fmt.Println("invalid choice")
+	}
 
 }

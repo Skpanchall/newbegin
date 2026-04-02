@@ -13,6 +13,7 @@ func main() {
 	fmt.Println("6. arrya and slices")
 	fmt.Println("7. sturcts")
 	fmt.Println("8. Profile update")
+	fmt.Println("9. API User Processor")
 	fmt.Println("Enter choice:")
 
 	fmt.Scanln(&choice)
@@ -33,6 +34,8 @@ func main() {
 		GetProductTotalValues()
 	} else if choice == 8 {
 		GetProfile()
+	} else if choice == 8 {
+		ApiUserProcess()
 	} else {
 		fmt.Println("Invalid choice")
 	}

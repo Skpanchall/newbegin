@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
 	"strings"
 )
 
@@ -145,6 +146,7 @@ func ApiUserProcess() {
 	fmt.Println("1. print all users name and email")
 	fmt.Println("2. Search user by name")
 	fmt.Println("3. Filter by Email Domain")
+	fmt.Println("4. Domain count for each domain")
 
 	var choice int
 	fmt.Scan(&choice)
@@ -181,6 +183,29 @@ func ApiUserProcess() {
 		if !found {
 			fmt.Println("no user found with this domain")
 		}
+	case 4:
+		domainCount := make(map[string]int)
+
+		for _, user := range users {
+
+			_, fullDomain, found := strings.Cut(user.Email, "@")
+			if found {
+				domain := strings.Split(fullDomain, ".")
+				if len(domain) > 0 {
+					domainCount[domain[0]]++
+				}
+			}
+		}
+		for domain, count := range domainCount {
+			fmt.Printf("Domain: %s , Count : %d\n", domain, count)
+		}
+		sort.Slice(users, func(i, j int) bool {
+			return users[i].ID > users[j].ID
+		})
+		for _, user := range users {
+			fmt.Printf("ID : %d , Name : %s\n", user.ID, user.Name)
+		}
+
 	default:
 		fmt.Println("invalid choice")
 	}

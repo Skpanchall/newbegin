@@ -34,7 +34,7 @@ func main() {
 		GetProductTotalValues()
 	} else if choice == 8 {
 		GetProfile()
-	} else if choice == 8 {
+	} else if choice == 9 {
 		ApiUserProcess()
 	} else {
 		fmt.Println("Invalid choice")

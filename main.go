@@ -36,6 +36,8 @@ func main() {
 		GetProfile()
 	} else if choice == 9 {
 		ApiUserProcess()
+	} else if choice == 10 {
+		UserCli()
 	} else {
 		fmt.Println("Invalid choice")
 	}

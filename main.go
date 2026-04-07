@@ -1,8 +1,23 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/Skpanchall/newbegin/handler"
+)
 
 func main() {
+	http.HandleFunc("/", handler.WelcomeAPI)
+	http.HandleFunc("/users", handler.GetUsers)
+	http.HandleFunc("/users/:id", handler.GetUser)
+	http.HandleFunc("/users/create", handler.CreateUser)
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		fmt.Println("Err while listen server :", err)
+	}
+	return
+
 	var choice int
 
 	fmt.Println("1. Bio Maker")

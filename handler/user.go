@@ -10,12 +10,36 @@ import (
 	"github.com/Skpanchall/newbegin/utils"
 )
 
+func HandleUsers(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		GetUsers(w, r)
+	default:
+		utils.SendResponse(w, "Method not allowed")
+	}
+}
+func HandleUser(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		GetUserByID(w, r)
+	case http.MethodPut:
+		UpdateUser(w, r)
+	case http.MethodDelete:
+		DeleteUser(w, r)
+	case http.MethodPost:
+		CreateUser(w, r)
+	default:
+		utils.SendResponse(w, "Method not allowed")
+	}
+}
+
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := storage.GetUsersFromFile()
 	if err != nil {
 		users = make(map[int]model.User)
 	}
 	json.NewEncoder(w).Encode(users)
+	w.WriteHeader(http.StatusOK)
 }
 func WelcomeAPI(w http.ResponseWriter, r *http.Request) {
 	utils.SendResponse(w, "Welcome to Go API")
@@ -43,6 +67,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		utils.SendResponse(w, err.Error())
 		return
 	}
+	defer r.Body.Close()
 
 	exist, ok := users[idInt]
 	if !ok {
@@ -61,6 +86,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		utils.SendResponse(w, err.Error())
 		return
 	}
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(users)
 }
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
@@ -80,23 +106,35 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		utils.SendResponse(w, "invalid id")
 		return
 	}
+	if _, ok := users[idInt]; !ok {
+		utils.SendResponse(w, "User not found")
+		return
+	}
 	delete(users, idInt)
 	err = storage.SaveUserToFile(users)
 	if err != nil {
 		utils.SendResponse(w, err.Error())
 		return
 	}
+	w.WriteHeader(http.StatusOK)
+	utils.SendResponse(w, "User deleted successfully")
 }
-func HandleUser(w http.ResponseWriter, r *http.Request) {
+func GetUserByID(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method == http.MethodPut {
-		UpdateUser(w, r)
-		return
-	} else if r.Method == http.MethodDelete {
-		DeleteUser(w, r)
+	users, err := storage.GetUsersFromFile()
+	if err != nil {
+		users = make(map[int]model.User)
+	}
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil {
+		utils.SendResponse(w, "invalid id")
 		return
 	}
-	utils.SendResponse(w, "Get User API")
+	if user, ok := users[id]; ok {
+		json.NewEncoder(w).Encode(user)
+		return
+	}
+	utils.SendResponse(w, "User not found")
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {

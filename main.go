@@ -3,15 +3,63 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/Skpanchall/newbegin/handler"
 )
 
+type middlewareWriter struct {
+	http.ResponseWriter
+	code int
+}
+
+func (w *middlewareWriter) WriteHeader(code int) {
+	w.code = code
+	w.ResponseWriter.WriteHeader(code)
+}
+
+type MiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
+
+func middleWare(h http.HandlerFunc, middlewares ...MiddlewareFunc) http.HandlerFunc {
+
+	for i := 0; i < len(middlewares); i++ {
+		h = middlewares[i](h)
+	}
+	return h
+
+}
+
+func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		token := r.URL.Query().Get("token")
+
+		if token != "123" {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized"))
+			fmt.Println("[BLOCKED] Unauthorized request")
+			return
+		}
+
+		next(w, r)
+	}
+}
+
+func loggingMiddleware(next http.HandlerFunc) http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		mw := &middlewareWriter{ResponseWriter: w}
+		next(mw, r)
+		duration := time.Since(start)
+		fmt.Println("[", r.Method, "]", r.URL.Path, "time : ", duration, "status :", mw.code)
+	}
+}
+
 func main() {
-	http.HandleFunc("/", handler.WelcomeAPI)
-	http.HandleFunc("/users", handler.GetUsers)
-	http.HandleFunc("/user", handler.GetUser)
-	http.HandleFunc("/users/create", handler.CreateUser)
+	http.HandleFunc("/", middleWare(handler.WelcomeAPI, loggingMiddleware, authMiddleware))
+	http.HandleFunc("/users", middleWare(handler.HandleUsers, authMiddleware, loggingMiddleware)) // order is here is first called loggingmiddleware and then authmiddleware
+	http.HandleFunc("/user", middleWare(handler.HandleUser, loggingMiddleware, authMiddleware))
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		fmt.Println("Err while listen server :", err)

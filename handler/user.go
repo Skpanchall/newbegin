@@ -10,68 +10,66 @@ import (
 	"github.com/Skpanchall/newbegin/utils"
 )
 
-func HandleUsers(w http.ResponseWriter, r *http.Request) {
+func HandleUsers(w http.ResponseWriter, r *http.Request) error {
 	switch r.Method {
 	case http.MethodGet:
-		GetUsers(w, r)
+		return GetUsers(w, r)
 	default:
-		utils.SendErrorResponse(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return &utils.ErrError{Message: "Method not allowed", Code: http.StatusMethodNotAllowed}
 	}
+
 }
-func HandleUser(w http.ResponseWriter, r *http.Request) {
+func HandleUser(w http.ResponseWriter, r *http.Request) error {
 	switch r.Method {
 	case http.MethodGet:
-		GetUserByID(w, r)
+		return GetUserByID(w, r)
 	case http.MethodPut:
-		UpdateUser(w, r)
+		return UpdateUser(w, r)
 	case http.MethodDelete:
-		DeleteUser(w, r)
+		return DeleteUser(w, r)
 	case http.MethodPost:
-		CreateUser(w, r)
+		return CreateUser(w, r)
 	default:
-		utils.SendErrorResponse(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return &utils.ErrError{Message: "Method not allowed", Code: http.StatusMethodNotAllowed}
 	}
 }
 
-func GetUsers(w http.ResponseWriter, r *http.Request) {
+func GetUsers(w http.ResponseWriter, r *http.Request) error {
 	users, err := storage.GetUsersFromFile()
 	if err != nil {
-		users = make(map[int]model.User)
+		return &utils.ErrError{Message: err.Error(), Code: http.StatusInternalServerError}
 	}
 	utils.SendSuccessResponse(w, users, http.StatusOK)
+	return nil
 }
 func WelcomeAPI(w http.ResponseWriter, r *http.Request) {
 	utils.SendSuccessResponse(w, "Welcome to Go API", http.StatusOK)
 }
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
+func UpdateUser(w http.ResponseWriter, r *http.Request) error {
 	users, err := storage.GetUsersFromFile()
 	if err != nil {
-		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
-		return
+		return &utils.ErrError{Message: err.Error(), Code: http.StatusInternalServerError}
 	}
 	// get a query parameter id
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		utils.SendErrorResponse(w, "id is required", http.StatusBadRequest)
-		return
+		return &utils.ErrError{Message: "id is required", Code: http.StatusBadRequest}
 	}
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		utils.SendErrorResponse(w, "invalid id", http.StatusBadRequest)
-		return
+		return &utils.ErrError{Message: "invalid id", Code: http.StatusBadRequest}
 	}
 	payload := model.User{}
 	err = json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
-		return
+		return &utils.ErrError{Message: err.Error(), Code: http.StatusBadRequest}
+
 	}
 	defer r.Body.Close()
 
 	exist, ok := users[idInt]
 	if !ok {
-		utils.SendErrorResponse(w, "User not found", http.StatusNotFound)
-		return
+		return &utils.ErrError{Message: "User not found", Code: http.StatusNotFound}
 	}
 	if payload.Name != "" {
 		exist.Name = payload.Name
@@ -82,41 +80,37 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	users[idInt] = exist
 	err = storage.SaveUserToFile(users)
 	if err != nil {
-		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
-		return
+		return &utils.ErrError{Message: err.Error(), Code: http.StatusInternalServerError}
 	}
 	utils.SendSuccessResponse(w, users, http.StatusOK)
+	return nil
 }
-func DeleteUser(w http.ResponseWriter, r *http.Request) {
+func DeleteUser(w http.ResponseWriter, r *http.Request) error {
 	users, err := storage.GetUsersFromFile()
 	if err != nil {
-		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
-		return
+		return &utils.ErrError{Message: err.Error(), Code: http.StatusInternalServerError}
 	}
 	// get a query parameter id
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		utils.SendErrorResponse(w, "id is required", http.StatusBadRequest)
-		return
+		return &utils.ErrError{Message: "id is required", Code: http.StatusBadRequest}
 	}
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		utils.SendErrorResponse(w, "invalid id", http.StatusBadRequest)
-		return
+		return &utils.ErrError{Message: "invalid id", Code: http.StatusBadRequest}
 	}
 	if _, ok := users[idInt]; !ok {
-		utils.SendErrorResponse(w, "User not found", http.StatusNotFound)
-		return
+		return &utils.ErrError{Message: "User not found", Code: http.StatusNotFound}
 	}
 	delete(users, idInt)
 	err = storage.SaveUserToFile(users)
 	if err != nil {
-		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
-		return
+		return &utils.ErrError{Message: err.Error(), Code: http.StatusInternalServerError}
 	}
 	utils.SendSuccessResponse(w, "User deleted successfully", http.StatusOK)
+	return nil
 }
-func GetUserByID(w http.ResponseWriter, r *http.Request) {
+func GetUserByID(w http.ResponseWriter, r *http.Request) error {
 
 	users, err := storage.GetUsersFromFile()
 	if err != nil {
@@ -124,17 +118,16 @@ func GetUserByID(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil {
-		utils.SendErrorResponse(w, "invalid id", http.StatusBadRequest)
-		return
+		return &utils.ErrError{Message: "invalid id", Code: http.StatusBadRequest}
 	}
 	if user, ok := users[id]; ok {
 		utils.SendSuccessResponse(w, user, http.StatusOK)
-		return
+		return nil
 	}
-	utils.SendErrorResponse(w, "User not found", http.StatusNotFound)
+	return &utils.ErrError{Message: "User not found", Code: http.StatusNotFound}
 }
 
-func CreateUser(w http.ResponseWriter, r *http.Request) {
+func CreateUser(w http.ResponseWriter, r *http.Request) error {
 	users, err := storage.GetUsersFromFile()
 	if err != nil {
 		users = make(map[int]model.User)
@@ -142,14 +135,13 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	payload := model.User{}
 	err = json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
-		return
+		return &utils.ErrError{Message: err.Error(), Code: http.StatusBadRequest}
 	}
 	users[payload.ID] = payload
 	err = storage.SaveUserToFile(users)
 	if err != nil {
-		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
-		return
+		return &utils.ErrError{Message: err.Error(), Code: http.StatusInternalServerError}
 	}
 	utils.SendSuccessResponse(w, users, http.StatusOK)
+	return nil
 }

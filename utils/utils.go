@@ -20,6 +20,15 @@ func SendSuccessResponse(w http.ResponseWriter, data interface{}, statusCode int
 	}
 	json.NewEncoder(w).Encode(res)
 }
+
+type ErrError struct {
+	Message string
+	Code    int
+}
+
+func (e *ErrError) Error() string {
+	return e.Message
+}
 func SendErrorResponse(w http.ResponseWriter, message string, statusCode int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)

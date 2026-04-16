@@ -15,7 +15,7 @@ func HandleUsers(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		GetUsers(w, r)
 	default:
-		utils.SendResponse(w, "Method not allowed")
+		utils.SendErrorResponse(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 func HandleUser(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func HandleUser(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		CreateUser(w, r)
 	default:
-		utils.SendResponse(w, "Method not allowed")
+		utils.SendErrorResponse(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -38,40 +38,39 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		users = make(map[int]model.User)
 	}
-	json.NewEncoder(w).Encode(users)
-	w.WriteHeader(http.StatusOK)
+	utils.SendSuccessResponse(w, users, http.StatusOK)
 }
 func WelcomeAPI(w http.ResponseWriter, r *http.Request) {
-	utils.SendResponse(w, "Welcome to Go API")
+	utils.SendSuccessResponse(w, "Welcome to Go API", http.StatusOK)
 }
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	users, err := storage.GetUsersFromFile()
 	if err != nil {
-		utils.SendResponse(w, err.Error())
+		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// get a query parameter id
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		utils.SendResponse(w, "id is required")
+		utils.SendErrorResponse(w, "id is required", http.StatusBadRequest)
 		return
 	}
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		utils.SendResponse(w, "invalid id")
+		utils.SendErrorResponse(w, "invalid id", http.StatusBadRequest)
 		return
 	}
 	payload := model.User{}
 	err = json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		utils.SendResponse(w, err.Error())
+		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
 
 	exist, ok := users[idInt]
 	if !ok {
-		utils.SendResponse(w, "User not found")
+		utils.SendErrorResponse(w, "User not found", http.StatusNotFound)
 		return
 	}
 	if payload.Name != "" {
@@ -83,41 +82,39 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	users[idInt] = exist
 	err = storage.SaveUserToFile(users)
 	if err != nil {
-		utils.SendResponse(w, err.Error())
+		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(users)
+	utils.SendSuccessResponse(w, users, http.StatusOK)
 }
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	users, err := storage.GetUsersFromFile()
 	if err != nil {
-		utils.SendResponse(w, err.Error())
+		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// get a query parameter id
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		utils.SendResponse(w, "id is required")
+		utils.SendErrorResponse(w, "id is required", http.StatusBadRequest)
 		return
 	}
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		utils.SendResponse(w, "invalid id")
+		utils.SendErrorResponse(w, "invalid id", http.StatusBadRequest)
 		return
 	}
 	if _, ok := users[idInt]; !ok {
-		utils.SendResponse(w, "User not found")
+		utils.SendErrorResponse(w, "User not found", http.StatusNotFound)
 		return
 	}
 	delete(users, idInt)
 	err = storage.SaveUserToFile(users)
 	if err != nil {
-		utils.SendResponse(w, err.Error())
+		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	utils.SendResponse(w, "User deleted successfully")
+	utils.SendSuccessResponse(w, "User deleted successfully", http.StatusOK)
 }
 func GetUserByID(w http.ResponseWriter, r *http.Request) {
 
@@ -127,14 +124,14 @@ func GetUserByID(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil {
-		utils.SendResponse(w, "invalid id")
+		utils.SendErrorResponse(w, "invalid id", http.StatusBadRequest)
 		return
 	}
 	if user, ok := users[id]; ok {
-		json.NewEncoder(w).Encode(user)
+		utils.SendSuccessResponse(w, user, http.StatusOK)
 		return
 	}
-	utils.SendResponse(w, "User not found")
+	utils.SendErrorResponse(w, "User not found", http.StatusNotFound)
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -145,14 +142,14 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	payload := model.User{}
 	err = json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		utils.SendResponse(w, err.Error())
+		utils.SendErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	users[payload.ID] = payload
 	err = storage.SaveUserToFile(users)
 	if err != nil {
-		utils.SendResponse(w, err.Error())
+		utils.SendErrorResponse(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(users)
+	utils.SendSuccessResponse(w, users, http.StatusOK)
 }

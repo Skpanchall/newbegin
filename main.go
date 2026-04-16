@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Skpanchall/newbegin/handler"
+	"github.com/Skpanchall/newbegin/utils"
 )
 
 type middlewareWriter struct {
@@ -35,9 +36,7 @@ func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		token := r.URL.Query().Get("token")
 
 		if token != "123" {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized"))
-			fmt.Println("[BLOCKED] Unauthorized request")
+			utils.SendErrorResponse(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
@@ -46,7 +45,6 @@ func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func loggingMiddleware(next http.HandlerFunc) http.HandlerFunc {
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		mw := &middlewareWriter{ResponseWriter: w}
@@ -57,9 +55,9 @@ func loggingMiddleware(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func main() {
-	http.HandleFunc("/", middleWare(handler.WelcomeAPI, loggingMiddleware, authMiddleware))
+	http.HandleFunc("/", middleWare(handler.WelcomeAPI, authMiddleware, loggingMiddleware))
 	http.HandleFunc("/users", middleWare(handler.HandleUsers, authMiddleware, loggingMiddleware)) // order is here is first called loggingmiddleware and then authmiddleware
-	http.HandleFunc("/user", middleWare(handler.HandleUser, loggingMiddleware, authMiddleware))
+	http.HandleFunc("/user", middleWare(handler.HandleUser, authMiddleware, loggingMiddleware))
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		fmt.Println("Err while listen server :", err)

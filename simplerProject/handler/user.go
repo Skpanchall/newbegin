@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Skpanchall/newbegin/model"
-	"github.com/Skpanchall/newbegin/storage"
-	"github.com/Skpanchall/newbegin/utils"
+	"github.com/Skpanchall/newbegin/simplerProject/model"
+	"github.com/Skpanchall/newbegin/simplerProject/storage"
+	"github.com/Skpanchall/newbegin/simplerProject/utils"
 )
 
 func HandleUsers(w http.ResponseWriter, r *http.Request) error {

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/Skpanchall/newbegin/model"
+	"github.com/Skpanchall/newbegin/simplerProject/model"
 )
 
 func SaveUserToFile(users map[int]model.User) error {

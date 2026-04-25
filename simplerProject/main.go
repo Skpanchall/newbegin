@@ -4,11 +4,21 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Skpanchall/newbegin/handler"
-	"github.com/Skpanchall/newbegin/middleware"
+	"github.com/Skpanchall/newbegin/simplerProject/handler"
+	"github.com/Skpanchall/newbegin/simplerProject/middleware"
 )
 
 func main() {
+
+	// http.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
+	// 	json.NewEncoder(w).Encode(map[string]string{"message": "hello from backend"})
+	// })
+	// err := http.ListenAndServe(":8080", nil)
+	// if err != nil {
+	// 	fmt.Println("Err while listen server :", err)
+	// }
+
+	// return
 	middleware.RegisterRoute("/users", handler.HandleUsers)
 	middleware.RegisterRoute("/user", handler.HandleUser)
 	err := http.ListenAndServe(":8080", nil)

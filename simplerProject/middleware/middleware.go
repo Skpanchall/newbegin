@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	utils "github.com/Skpanchall/newbegin/utils"
+	utils "github.com/Skpanchall/newbegin/simplerProject/utils"
 )
 
 type middlewareWriter struct {
